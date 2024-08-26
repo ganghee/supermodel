@@ -4,15 +4,30 @@
     <name>supermodel</name>
     <vendor>ganghee</vendor>
 
+    <depends>org.jetbrains.kotlin</depends>
     <depends>com.intellij.modules.platform</depends>
+    <depends>org.jetbrains.android</depends>
+    <depends>com.intellij.modules.java</depends>
+    <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.modules.androidstudio</depends>
 
     <resource-bundle>messages.MyBundle</resource-bundle>
 
-    <extensions defaultExtensionNs="com.intellij">
-        <toolWindow factoryClass="com.github.ganghee.supermodel.toolWindow.MyToolWindowFactory" id="MyToolWindow"/>
-    </extensions>
-
     <applicationListeners>
-        <listener class="com.github.ganghee.supermodel.listeners.MyApplicationActivationListener" topic="com.intellij.openapi.application.ApplicationActivationListener"/>
+        <listener class="com.github.ganghee.supermodel.listeners.MyApplicationActivationListener"
+            topic="com.intellij.openapi.application.ApplicationActivationListener" />
     </applicationListeners>
+
+    <actions>
+        <group description="Demo action group" id="MyDemoActionGroup" >
+            <action class="com.github.ganghee.supermodel.MyDemoAction"
+                description="Demo action example"
+                id="com.example.demoplugin.MyDemoAction"
+                text="Demo Action" />
+
+            <add-to-group
+                anchor="first"
+                group-id="NewGroup"/>
+        </group>
+    </actions>
 </idea-plugin>

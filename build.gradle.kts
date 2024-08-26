@@ -1,6 +1,5 @@
 import org.jetbrains.changelog.Changelog
 import org.jetbrains.changelog.markdownToHTML
-import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 
 plugins {
     id("java") // Java support
@@ -35,18 +34,22 @@ dependencies {
 
     // IntelliJ Platform Gradle Plugin Dependencies Extension - read more: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-dependencies-extension.html
     intellijPlatform {
-        create(providers.gradleProperty("platformType"), providers.gradleProperty("platformVersion"))
-
-        // Plugin Dependencies. Uses `platformBundledPlugins` property from the gradle.properties file for bundled IntelliJ Platform plugins.
-        bundledPlugins(providers.gradleProperty("platformBundledPlugins").map { it.split(',') })
-
-        // Plugin Dependencies. Uses `platformPlugins` property from the gradle.properties file for plugin from JetBrains Marketplace.
-        plugins(providers.gradleProperty("platformPlugins").map { it.split(',') })
-
+        androidStudio("2024.1.1.13")
+        bundledPlugin("org.jetbrains.android")
         instrumentationTools()
-        pluginVerifier()
-        zipSigner()
-        testFramework(TestFrameworkType.Platform)
+//        create(providers.gradleProperty("platformType"), providers.gradleProperty("platformVersion"))
+//
+//        local(providers.gradleProperty("StudioRunPath")) // Local IntelliJ Platform SDK
+//        // Plugin Dependencies. Uses `platformBundledPlugins` property from the gradle.properties file for bundled IntelliJ Platform plugins.
+//        bundledPlugins(providers.gradleProperty("platformBundledPlugins").map { it.split(',') })
+//
+//        // Plugin Dependencies. Uses `platformPlugins` property from the gradle.properties file for plugin from JetBrains Marketplace.
+//        plugins(providers.gradleProperty("platformPlugins").map { it.split(',') })
+//
+//        instrumentationTools()
+//        pluginVerifier()
+//        zipSigner()
+//        testFramework(TestFrameworkType.Platform)
     }
 }
 
@@ -54,7 +57,6 @@ dependencies {
 intellijPlatform {
     pluginConfiguration {
         version = providers.gradleProperty("pluginVersion")
-
         // Extract the <!-- Plugin description --> section from README.md and provide for the plugin's manifest
         description = providers.fileContents(layout.projectDirectory.file("README.md")).asText.map {
             val start = "<!-- Plugin description -->"
@@ -98,7 +100,8 @@ intellijPlatform {
         // The pluginVersion is based on the SemVer (https://semver.org) and supports pre-release labels, like 2.1.7-alpha.3
         // Specify pre-release label to publish the plugin in a custom Release Channel automatically. Read more:
         // https://plugins.jetbrains.com/docs/intellij/deployment.html#specifying-a-release-channel
-        channels = providers.gradleProperty("pluginVersion").map { listOf(it.substringAfter('-', "").substringBefore('.').ifEmpty { "default" }) }
+        channels = providers.gradleProperty("pluginVersion")
+            .map { listOf(it.substringAfter('-', "").substringBefore('.').ifEmpty { "default" }) }
     }
 
     pluginVerification {
