@@ -29,7 +29,6 @@ class MyDemoAction : AnAction() {
             if (e.getData(CommonDataKeys.PSI_ELEMENT) is PsiDirectory) e.getData(CommonDataKeys.PSI_ELEMENT) as PsiDirectory?
             else null
 
-        // Check if a directory is selected
         if (psiDirectory != null) {
             val virtualFile = psiDirectory.virtualFile
             val directoryPath = virtualFile.path
@@ -94,14 +93,8 @@ class MyCustomDialog(
             font = java.awt.Font("Monospaced", java.awt.Font.PLAIN, 12)
         }
         lateinit var jsonText: String
-        var fields: List<String> = listOf(
-            "final int? memberSeq;",
-            "final String? memberNick;",
-        )
-        var parameters: List<String> = listOf(
-            "required this.memberSeq,",
-            "required this.memberNick,",
-        )
+        val fields = mutableListOf<String>()
+        val parameters = mutableListOf<String>()
 
         jsonTextField.document.addDocumentListener(object : javax.swing.event.DocumentListener {
             override fun insertUpdate(e: javax.swing.event.DocumentEvent?) = updateText()
@@ -112,10 +105,34 @@ class MyCustomDialog(
                 val text = jsonTextField.text
                 if (text.isNotEmpty()) {
                     try {
+                        val mapper = jacksonObjectMapper()
+                        val map: Map<String, Any> = mapper.readValue(text)
+                        fields.clear()
+                        parameters.clear()
+                        map.entries.forEach { (key, value) ->
+                            when (value) {
+                                is Int -> {
+                                    fields.add("final int $key;")
+                                    parameters.add("required this.$key,")
+                                }
+                                is String -> {
+                                    fields.add("final String $key;")
+                                    parameters.add("required this.$key,")
+                                }
+                                is List<*> -> {
+                                    fields.add("final List<dynamic> $key;")
+                                    parameters.add("required this.$key,")
+                                }
+                                is Double -> {
+                                    fields.add("final double $key;")
+                                    parameters.add("required this.$key,")
+                                }
+                            }
+                        }
                         jsonText = createClassMessage(
                             className = objectName,
-                            fields = fields,
-                            parameters = parameters
+                            fields = fields.distinct(),
+                            parameters = parameters.distinct()
                         )
                         previewWidget.text = jsonText
                         inputText = text

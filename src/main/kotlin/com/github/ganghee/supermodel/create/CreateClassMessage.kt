@@ -9,7 +9,11 @@ fun createClassMessage(
 <html>
 <pre>
 class $className {
-  ${fields.joinToString("\n  ")}
+  ${
+        fields.joinToString("\n  ")
+            .replace("<", "&lt;")
+            .replace(">", "&gt;")
+    }
 
   $className({
     ${parameters.joinToString("\n    ")}
