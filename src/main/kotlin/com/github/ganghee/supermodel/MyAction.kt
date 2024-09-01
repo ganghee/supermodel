@@ -1,8 +1,7 @@
 package com.github.ganghee.supermodel
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.ganghee.supermodel.create.createClassMessage
+import com.github.ganghee.supermodel.create.createParameter
 import com.github.ganghee.supermodel.extensions.save
 import com.github.ganghee.supermodel.extensions.toSnakeCase
 import com.github.ganghee.supermodel.model.createModel
@@ -92,9 +91,8 @@ class MyCustomDialog(
             wrapStyleWord = false
             font = java.awt.Font("Monospaced", java.awt.Font.PLAIN, 12)
         }
-        lateinit var jsonText: String
-        val fields = mutableListOf<String>()
-        val parameters = mutableListOf<String>()
+        val htmlJsons = mutableListOf<String>()
+        val dataModelItems = mutableListOf<Pair<List<String>, List<String>>>()
 
         jsonTextField.document.addDocumentListener(object : javax.swing.event.DocumentListener {
             override fun insertUpdate(e: javax.swing.event.DocumentEvent?) = updateText()
@@ -105,36 +103,24 @@ class MyCustomDialog(
                 val text = jsonTextField.text
                 if (text.isNotEmpty()) {
                     try {
-                        val mapper = jacksonObjectMapper()
-                        val map: Map<String, Any> = mapper.readValue(text)
-                        fields.clear()
-                        parameters.clear()
-                        map.entries.forEach { (key, value) ->
-                            when (value) {
-                                is Int -> {
-                                    fields.add("final int $key;")
-                                    parameters.add("required this.$key,")
-                                }
-                                is String -> {
-                                    fields.add("final String $key;")
-                                    parameters.add("required this.$key,")
-                                }
-                                is List<*> -> {
-                                    fields.add("final List<dynamic> $key;")
-                                    parameters.add("required this.$key,")
-                                }
-                                is Double -> {
-                                    fields.add("final double $key;")
-                                    parameters.add("required this.$key,")
-                                }
+                        dataModelItems.clear()
+                        htmlJsons.clear()
+                        createParameter(
+                            jsonText = text,
+                            dataModelItems = dataModelItems,
+                            onParameter = { fields, parameters ->
+                                dataModelItems.add(Pair(fields, parameters))
                             }
-                        }
-                        jsonText = createClassMessage(
-                            className = objectName,
-                            fields = fields.distinct(),
-                            parameters = parameters.distinct()
                         )
-                        previewWidget.text = jsonText
+                        dataModelItems.forEach {
+                            val htmlJsonText = createClassMessage(
+                                className = objectName,
+                                fields = it.first.distinct(),
+                                parameters = it.second.distinct()
+                            )
+                            htmlJsons.add(htmlJsonText)
+                        }
+                        previewWidget.text = htmlJsons.reversed().joinToString("")
                         inputText = text
                     } catch (e: Exception) {
                         previewWidget.text = "wrong json format"
@@ -150,12 +136,16 @@ class MyCustomDialog(
                         text("Class Name:")
                         textField().whenTextChangedFromUi {
                             objectName = it
-                            jsonText = createClassMessage(
-                                className = objectName,
-                                fields = fields,
-                                parameters = parameters
-                            )
-                            previewWidget.text = jsonText
+                            htmlJsons.clear()
+                            dataModelItems.forEach {
+                                val htmlJsonText = createClassMessage(
+                                    className = objectName,
+                                    fields = it.first.distinct(),
+                                    parameters = it.second.distinct()
+                                )
+                                htmlJsons.add(htmlJsonText)
+                            }
+                            previewWidget.text = htmlJsons.reversed().joinToString("")
                         }
                     }
                     row {

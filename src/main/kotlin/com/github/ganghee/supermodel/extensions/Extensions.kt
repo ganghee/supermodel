@@ -1,15 +1,21 @@
 package com.github.ganghee.supermodel.extensions
 
-import com.android.tools.idea.wizard.template.*
 import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.vfs.VirtualFile
-import com.intellij.platform.ide.progress.ModalTaskOwner.project
-import com.intellij.psi.*
-import org.jetbrains.kotlin.idea.*
-import java.util.*
+import com.intellij.psi.PsiDirectory
+import java.util.Locale
 
 
 fun String.toSnakeCase() = replace(humps, "_").lowercase(Locale.getDefault())
+
+fun String.toUpperCamelCase() = split("_").joinToString("") {
+    it.replaceFirstChar { word ->
+        if (word.isLowerCase()) word.titlecase(
+            Locale.getDefault()
+        ) else word.toString()
+    }
+}
+
 private val humps = "(?<=.)(?=\\p{Upper})".toRegex()
 
 fun String.save(srcDir: PsiDirectory, fileName: String) {
