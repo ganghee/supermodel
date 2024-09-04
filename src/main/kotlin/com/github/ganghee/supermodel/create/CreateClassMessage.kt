@@ -6,7 +6,6 @@ fun createClassMessage(
     parameters: List<String>
 ): String {
     return """
-<html>
 <pre>
 class $className {
   ${
@@ -20,7 +19,6 @@ class $className {
   });
 }
 </pre>
-</html>
     """.trimIndent().replace("\n", "<br>")
         .replace("\t", "&nbsp;&nbsp;&nbsp;&nbsp;")
         .replace(" ", "&nbsp;")

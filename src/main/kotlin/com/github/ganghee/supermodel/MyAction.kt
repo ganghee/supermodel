@@ -1,14 +1,14 @@
 package com.github.ganghee.supermodel
 
 import com.github.ganghee.supermodel.create.createClassMessage
+import com.github.ganghee.supermodel.create.createDataClassContent
 import com.github.ganghee.supermodel.create.createParameter
 import com.github.ganghee.supermodel.extensions.save
 import com.github.ganghee.supermodel.extensions.toSnakeCase
-import com.github.ganghee.supermodel.model.createModel
+import com.github.ganghee.supermodel.model.ModelInfo
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
-import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.DialogWrapper
 import com.intellij.openapi.ui.Messages
 import com.intellij.psi.PsiDirectory
@@ -35,10 +35,8 @@ class MyDemoAction : AnAction() {
             if (dialog.showAndGet()) {
                 createDataClass(
                     directory = psiDirectory,
-                    className = dialog.className,
-                    directoryPath = directoryPath,
-                    project = e.project!!,
-                    jsonText = dialog.jsonText
+                    rootClassName = dialog.rootClassName,
+                    modelItems = dialog.modelItems
                 )
             }
         } else {
@@ -50,31 +48,28 @@ class MyDemoAction : AnAction() {
 
     private fun createDataClass(
         directory: PsiDirectory,
-        className: String,
-        directoryPath: String,
-        project: Project,
-        jsonText: String
+        rootClassName: String,
+        modelItems: List<ModelInfo>
     ) {
-        createModel(
-            packageName = directoryPath,
-            className = className,
-            project = project,
-            jsonText = jsonText
-        ).save(
-            srcDir = directory, fileName = "${className.toSnakeCase()}.dart"
-        )
+        modelItems.forEach{
+            createDataClassContent(
+                modelItems = listOf(it)
+            ).save(
+                srcDir = directory, fileName = "${it.className.toSnakeCase()}.dart"
+            )
+        }
         // Show the entered text in a message dialog
         Messages.showMessageDialog(
-            "Your ClassName: $className", "Information", Messages.getInformationIcon()
+            "Your ClassName: $rootClassName", "Information", Messages.getInformationIcon()
         )
     }
 }
 
 @Suppress("DialogTitleCapitalization", "UnstableApiUsage")
-class MyCustomDialog(
-) : DialogWrapper(true) {
+class MyCustomDialog : DialogWrapper(true) {
     private lateinit var objectName: String
     private var inputText: String = "{}"
+    private val models = mutableListOf<ModelInfo>()
 
     init {
         title = "Json to Dart"
@@ -92,7 +87,6 @@ class MyCustomDialog(
             font = java.awt.Font("Monospaced", java.awt.Font.PLAIN, 12)
         }
         val htmlJsons = mutableListOf<String>()
-        val dataModelItems = mutableListOf<Pair<List<String>, List<String>>>()
 
         jsonTextField.document.addDocumentListener(object : javax.swing.event.DocumentListener {
             override fun insertUpdate(e: javax.swing.event.DocumentEvent?) = updateText()
@@ -103,24 +97,31 @@ class MyCustomDialog(
                 val text = jsonTextField.text
                 if (text.isNotEmpty()) {
                     try {
-                        dataModelItems.clear()
+                        models.clear()
                         htmlJsons.clear()
                         createParameter(
                             jsonText = text,
-                            dataModelItems = dataModelItems,
+                            modelItems = models,
                             onParameter = { fields, parameters ->
-                                dataModelItems.add(Pair(fields, parameters))
+                                models.add(
+                                    0,
+                                    ModelInfo(
+                                        className = objectName,
+                                        fields = fields,
+                                        parameters = parameters
+                                    )
+                                )
                             }
                         )
-                        dataModelItems.forEach {
+                        modelItems.forEach {
                             val htmlJsonText = createClassMessage(
-                                className = objectName,
-                                fields = it.first.distinct(),
-                                parameters = it.second.distinct()
+                                className = it.className,
+                                fields = it.fields.distinct(),
+                                parameters = it.parameters.distinct()
                             )
                             htmlJsons.add(htmlJsonText)
                         }
-                        previewWidget.text = htmlJsons.reversed().joinToString("")
+                        previewWidget.text =  "<html>" + htmlJsons.joinToString("") + "</html>"
                         inputText = text
                     } catch (e: Exception) {
                         previewWidget.text = "wrong json format"
@@ -137,21 +138,23 @@ class MyCustomDialog(
                         textField().whenTextChangedFromUi {
                             objectName = it
                             htmlJsons.clear()
-                            dataModelItems.forEach {
+                            modelItems.forEach {
                                 val htmlJsonText = createClassMessage(
-                                    className = objectName,
-                                    fields = it.first.distinct(),
-                                    parameters = it.second.distinct()
+                                    className = rootClassName,
+                                    fields = it.fields.distinct(),
+                                    parameters = it.parameters.distinct()
                                 )
                                 htmlJsons.add(htmlJsonText)
                             }
-                            previewWidget.text = htmlJsons.reversed().joinToString("")
+                            previewWidget.text =
+                                "<html>" + htmlJsons.joinToString("") + "</html>"
                         }
                     }
                     row {
                         scrollCell(jsonTextField).align(AlignX.FILL)
                     }
                 }
+
                 cell(previewWidget).align(AlignX.CENTER)
             }
         }
@@ -159,9 +162,9 @@ class MyCustomDialog(
         return panelDsl
     }
 
-    val className: String
+    val rootClassName: String
         get() = this.objectName
 
-    val jsonText: String
-        get() = this.inputText
+    val modelItems: List<ModelInfo>
+        get() = this.models
 }

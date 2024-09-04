@@ -3,11 +3,12 @@ package com.github.ganghee.supermodel.create
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.ganghee.supermodel.extensions.toUpperCamelCase
+import com.github.ganghee.supermodel.model.ModelInfo
 import com.google.gson.Gson
 
 fun createParameter(
     jsonText: String,
-    dataModelItems: MutableList<Pair<List<String>, List<String>>>,
+    modelItems: MutableList<ModelInfo>,
     onParameter: (fields: List<String>, parameters: List<String>) -> Unit
 ) {
     val mapper = jacksonObjectMapper()
@@ -22,8 +23,6 @@ fun createParameter(
             }
 
             is String -> {
-                println("jsonText12 ${key} ${value}")
-
                 fields.add("final String $key;")
                 parameters.add("required this.$key,")
             }
@@ -60,9 +59,16 @@ fun createParameter(
                 val gson = Gson()
                 createParameter(
                     jsonText = gson.toJson(value).toString(),
-                    dataModelItems = dataModelItems,
+                    modelItems = modelItems,
                     onParameter = { fields, parameters ->
-                        dataModelItems.add(Pair(fields, parameters))
+                        modelItems.add(
+                            0,
+                            ModelInfo(
+                                className = key.toUpperCamelCase(),
+                                fields = fields,
+                                parameters = parameters
+                            )
+                        )
                     }
                 )
             }
