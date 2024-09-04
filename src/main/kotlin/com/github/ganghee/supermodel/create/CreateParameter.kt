@@ -5,16 +5,22 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.ganghee.supermodel.extensions.toUpperCamelCase
 import com.github.ganghee.supermodel.model.ModelInfo
 import com.google.gson.Gson
+import org.jetbrains.kotlin.tools.projectWizard.templates.KtorServerTemplate.imports
 
 fun createParameter(
     jsonText: String,
     modelItems: MutableList<ModelInfo>,
-    onParameter: (fields: List<String>, parameters: List<String>) -> Unit
+    onParameter: (
+        fields: List<String>,
+        parameters: List<String>,
+        imports: List<String>
+    ) -> Unit
 ) {
     val mapper = jacksonObjectMapper()
     val map: Map<String, Any> = mapper.readValue(jsonText)
     val fields = mutableListOf<String>()
     val parameters = mutableListOf<String>()
+    val imports = mutableListOf<String>()
     map.entries.forEach { (key, value) ->
         when (value) {
             is Int -> {
@@ -60,13 +66,14 @@ fun createParameter(
                 createParameter(
                     jsonText = gson.toJson(value).toString(),
                     modelItems = modelItems,
-                    onParameter = { fields, parameters ->
+                    onParameter = { fields, parameters, imports ->
                         modelItems.add(
                             0,
                             ModelInfo(
                                 className = key.toUpperCamelCase(),
                                 fields = fields,
-                                parameters = parameters
+                                parameters = parameters,
+                                imports = imports
                             )
                         )
                     }
@@ -74,5 +81,5 @@ fun createParameter(
             }
         }
     }
-    onParameter(fields, parameters)
+    onParameter(fields, parameters, imports)
 }
