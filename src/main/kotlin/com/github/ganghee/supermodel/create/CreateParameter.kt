@@ -2,10 +2,10 @@ package com.github.ganghee.supermodel.create
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import com.github.ganghee.supermodel.extensions.toSnakeCase
 import com.github.ganghee.supermodel.extensions.toUpperCamelCase
 import com.github.ganghee.supermodel.model.ModelInfo
 import com.google.gson.Gson
-import org.jetbrains.kotlin.tools.projectWizard.templates.KtorServerTemplate.imports
 
 fun createParameter(
     jsonText: String,
@@ -62,6 +62,7 @@ fun createParameter(
             is LinkedHashMap<*, *> -> {
                 fields.add("final ${key.toUpperCamelCase()} $key;")
                 parameters.add("required this.$key,")
+                imports.add("import '${key.toSnakeCase()}.dart';")
                 val gson = Gson()
                 createParameter(
                     jsonText = gson.toJson(value).toString(),
