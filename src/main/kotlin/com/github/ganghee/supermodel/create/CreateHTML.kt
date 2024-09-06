@@ -4,7 +4,10 @@ import javax.swing.JLabel
 fun createHTML(
     modelItems: List<ModelInfo>,
     isSeparateCheckBoxSelected: Boolean,
-    previewWidget: JLabel
+    previewWidget: JLabel,
+    isFreezedSelected : Boolean,
+    isFromJsonSelected : Boolean,
+    isToJsonSelected : Boolean,
 ) {
     val htmlJsons = mutableListOf<String>()
     modelItems.forEach {
@@ -13,7 +16,10 @@ fun createHTML(
             fields = it.fields.distinct(),
             parameters = it.parameters.distinct(),
             imports = it.imports.distinct(),
-            isShowImports = isSeparateCheckBoxSelected,
+            isSeparateCheckBoxSelected = isSeparateCheckBoxSelected,
+            isFreezedSelected = isFreezedSelected,
+            isFromJsonSelected = isFromJsonSelected,
+            isToJsonSelected = isToJsonSelected,
         )
         htmlJsons.add(htmlJsonText)
     }
@@ -25,11 +31,14 @@ fun createHTMLClass(
     fields: List<String>,
     parameters: List<String>,
     imports: List<String>,
-    isShowImports: Boolean
+    isSeparateCheckBoxSelected: Boolean,
+    isFreezedSelected: Boolean,
+    isFromJsonSelected: Boolean,
+    isToJsonSelected: Boolean,
 ): String {
     return """
 <pre>
-${if(isShowImports) imports.joinToString("\n") else ""}
+${if(isSeparateCheckBoxSelected) imports.joinToString("\n") else ""}
 
 class $className {
   ${
