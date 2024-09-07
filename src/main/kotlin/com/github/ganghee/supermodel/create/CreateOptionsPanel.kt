@@ -1,61 +1,32 @@
-@file:Suppress("UnstableApiUsage")
+package com.github.ganghee.supermodel.create
 
 import com.github.ganghee.supermodel.model.ModelInfo
 import com.intellij.ui.dsl.builder.panel
 import com.intellij.ui.dsl.builder.whenStateChangedFromUi
-import javax.swing.JLabel
 import javax.swing.JPanel
 
 fun createClassOptionsPanel(
     classOptionsPanel: JPanel,
     rightPanel: JPanel,
     models: List<ModelInfo>,
-    isSeparateCheckBoxSelected: Boolean,
-    previewWidget: JLabel,
-    isFreezedSelected: Boolean,
-    isFromJsonSelected: Boolean,
-    isToJsonSelected: Boolean,
-    onCheckBoxClick: (isFreezedSelected: Boolean, isToJsonSelected: Boolean, isFromJsonSelected: Boolean) -> Unit,
+    onCheckBoxClick: (index: Int, isFreezed: Boolean?, isToJson: Boolean?, isFromJson: Boolean?) -> Unit,
 ) {
     classOptionsPanel.removeAll()
     classOptionsPanel.add(
         panel {
-            models.map {
-                println("className: ${it.className}")
+            models.mapIndexed { index, modelInfo ->
                 row {
-                    text("Class Name: ${it.className}")
+                    text("Class Name: ${modelInfo.className}")
+                }
+                row {
                     checkBox("Create freezed").whenStateChangedFromUi { selected ->
-                        onCheckBoxClick(selected, isToJsonSelected, isFromJsonSelected)
-                        createHTML(
-                            modelItems = models,
-                            isSeparateCheckBoxSelected = isSeparateCheckBoxSelected,
-                            previewWidget = previewWidget,
-                            isFreezedSelected = isFreezedSelected,
-                            isFromJsonSelected = isFromJsonSelected,
-                            isToJsonSelected = isToJsonSelected
-                        )
+                        onCheckBoxClick(index, selected, null, null)
                     }
                     checkBox("Create toJson (request)").whenStateChangedFromUi { selected ->
-                        onCheckBoxClick(isFreezedSelected, selected, isFromJsonSelected)
-                        createHTML(
-                            modelItems = models,
-                            isSeparateCheckBoxSelected = isSeparateCheckBoxSelected,
-                            previewWidget = previewWidget,
-                            isFreezedSelected = isFreezedSelected,
-                            isFromJsonSelected = isFromJsonSelected,
-                            isToJsonSelected = isToJsonSelected
-                        )
+                        onCheckBoxClick(index, null, selected, null)
                     }
                     checkBox("Create fromJson (response)").whenStateChangedFromUi { selected ->
-                        onCheckBoxClick(isFreezedSelected, isToJsonSelected, selected)
-                        createHTML(
-                            modelItems = models,
-                            isSeparateCheckBoxSelected = isSeparateCheckBoxSelected,
-                            previewWidget = previewWidget,
-                            isFreezedSelected = isFreezedSelected,
-                            isFromJsonSelected = isFromJsonSelected,
-                            isToJsonSelected = isToJsonSelected
-                        )
+                        onCheckBoxClick(index, null, null, selected)
                     }
                 }
             }

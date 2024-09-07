@@ -7,7 +7,7 @@ import com.intellij.ui.dsl.builder.AlignX
 import com.intellij.ui.dsl.builder.panel
 import com.intellij.ui.dsl.builder.whenStateChangedFromUi
 import com.intellij.ui.dsl.builder.whenTextChangedFromUi
-import createClassOptionsPanel
+import com.github.ganghee.supermodel.create.createClassOptionsPanel
 import createHTML
 import java.awt.Dimension
 import javax.swing.BoxLayout
@@ -22,9 +22,6 @@ class MyCustomDialog : DialogWrapper(true) {
     private var objectName: String = ""
     private val models = mutableListOf<ModelInfo>()
     private var isSeparateCheckBoxSelected = false
-    private var isFreezedSelected = false
-    private var isFromJsonSelected = false
-    private var isToJsonSelected = false
 
     init {
         title = "Json to Dart"
@@ -51,12 +48,9 @@ class MyCustomDialog : DialogWrapper(true) {
                 checkBox("Separate file").whenStateChangedFromUi { selected ->
                     isSeparateCheckBoxSelected = selected
                     createHTML(
-                        modelItems = modelItems,
+                        modelItems = models,
                         isSeparateCheckBoxSelected = isSeparateCheckBoxSelected,
                         previewWidget = previewWidget,
-                        isFreezedSelected = isFreezedSelected,
-                        isFromJsonSelected = isFromJsonSelected,
-                        isToJsonSelected = isToJsonSelected
                     )
                 }
             }
@@ -71,40 +65,17 @@ class MyCustomDialog : DialogWrapper(true) {
                 text("Class Name:")
                 textField().whenTextChangedFromUi {
                     objectName = it
-
-                    val changedModelItems = models.mapIndexed { index, modelInfo ->
-                        if (index == 0) modelInfo.copy(className = it) else modelInfo
+                    models.replaceAll { modelInfo ->
+                        if (modelInfo == models.first()) {
+                            modelInfo.copy(className = objectName)
+                        } else {
+                            modelInfo
+                        }
                     }
                     createHTML(
-                        modelItems = changedModelItems,
+                        modelItems = models,
                         isSeparateCheckBoxSelected = isSeparateCheckBoxSelected,
                         previewWidget = previewWidget,
-                        isFreezedSelected = isFreezedSelected,
-                        isFromJsonSelected = isFromJsonSelected,
-                        isToJsonSelected = isToJsonSelected
-                    )
-                    createClassOptionsPanel(
-                        classOptionsPanel = classOptionsPanel,
-                        rightPanel = rightPanel,
-                        models = changedModelItems,
-                        isSeparateCheckBoxSelected = isSeparateCheckBoxSelected,
-                        previewWidget = previewWidget,
-                        isFreezedSelected = isFreezedSelected,
-                        isFromJsonSelected = isFromJsonSelected,
-                        isToJsonSelected = isToJsonSelected,
-                        onCheckBoxClick = { isFreezedClick, isToJsonClick, isFromJsonClick ->
-                            isFreezedSelected = isFreezedClick
-                            isToJsonSelected = isToJsonClick
-                            isFromJsonSelected = isFromJsonClick
-                            createHTML(
-                                modelItems = changedModelItems,
-                                isSeparateCheckBoxSelected = isSeparateCheckBoxSelected,
-                                previewWidget = previewWidget,
-                                isFreezedSelected = isFreezedSelected,
-                                isFromJsonSelected = isFromJsonSelected,
-                                isToJsonSelected = isToJsonSelected
-                            )
-                        },
                     )
                 }
             }
@@ -151,34 +122,31 @@ class MyCustomDialog : DialogWrapper(true) {
                             modelItems = models,
                             isSeparateCheckBoxSelected = isSeparateCheckBoxSelected,
                             previewWidget = previewWidget,
-                            isFreezedSelected = isFreezedSelected,
-                            isFromJsonSelected = isFromJsonSelected,
-                            isToJsonSelected = isToJsonSelected
                         )
                         createClassOptionsPanel(
                             classOptionsPanel = classOptionsPanel,
                             rightPanel = rightPanel,
                             models = models,
-                            isSeparateCheckBoxSelected = isSeparateCheckBoxSelected,
-                            previewWidget = previewWidget,
-                            isFreezedSelected = isFreezedSelected,
-                            isFromJsonSelected = isFromJsonSelected,
-                            isToJsonSelected = isToJsonSelected,
-                            onCheckBoxClick = { isFreezedClick, isToJsonClick, isFromJsonClick ->
-                                isFreezedSelected = isFreezedClick
-                                isToJsonSelected = isToJsonClick
-                                isFromJsonSelected = isFromJsonClick
+                            onCheckBoxClick = { index, isFreezed, isToJson, isFromJson ->
+                                models.replaceAll { modelInfo ->
+                                    val changedOptionModel = modelInfo.option.copy(
+                                        isFreezedSelected = isFreezed ?: modelInfo.option.isFreezedSelected,
+                                        isToJsonSelected = isToJson ?: modelInfo.option.isToJsonSelected,
+                                        isFromJsonSelected = isFromJson ?: modelInfo.option.isFromJsonSelected,
+                                    )
+                                    if (modelInfo == models[index]) {
+                                        modelInfo.copy(option = changedOptionModel)
+                                    } else {
+                                        modelInfo
+                                    }
+                                }
                                 createHTML(
                                     modelItems = models,
                                     isSeparateCheckBoxSelected = isSeparateCheckBoxSelected,
                                     previewWidget = previewWidget,
-                                    isFreezedSelected = isFreezedSelected,
-                                    isFromJsonSelected = isFromJsonSelected,
-                                    isToJsonSelected = isToJsonSelected
                                 )
                             },
                         )
-
                     } catch (e: Exception) {
                         previewWidget.text = "wrong json format"
                     }
