@@ -1,4 +1,3 @@
-import com.github.ganghee.supermodel.extensions.toSnakeCase
 import com.github.ganghee.supermodel.model.ModelInfo
 import com.github.ganghee.supermodel.model.Option
 import javax.swing.JLabel
@@ -18,7 +17,8 @@ fun createHTML(
             imports = it.imports.distinct(),
             isSeparateCheckBoxSelected = isSeparateCheckBoxSelected,
             option = it.option,
-            hasFreezedAnnotation = modelItems.any { it.option.isFreezedSelected }
+            hasFreezedAnnotation = modelItems.any { it.option.isFreezedSelected },
+            hasJsonAnnotation = modelItems.any { it.option.isFromJsonSelected || it.option.isToJsonSelected }
         )
         htmlJsons.add(htmlJsonText)
     }
@@ -34,19 +34,40 @@ fun createHTMLClass(
     isSeparateCheckBoxSelected: Boolean,
     option: Option,
     hasFreezedAnnotation: Boolean,
+    hasJsonAnnotation: Boolean,
 ): String {
     var htmlClass: String =
         """
 <pre>
 ${if (isSeparateCheckBoxSelected) imports.joinToString("\n") else ""}
-${if ((index == 0 && hasFreezedAnnotation && !isSeparateCheckBoxSelected) || (index != 0 && isSeparateCheckBoxSelected && option.isFreezedSelected)) "import 'package:freezed_annotation/freezed_annotation.dart';\n\npart '" + className.toSnakeCase() + ".freezed.dart';\n" else ""}
+${
+            createFreezedPart(
+                hasFreezedAnnotation = hasFreezedAnnotation,
+                isFreezed = option.isFreezedSelected,
+                isFirst = index == 0,
+                isSeparatedFile = isSeparateCheckBoxSelected,
+                className = className
+            )
+        }
+${
+            createGeneratorPart(
+                hasJsonAnnotation = hasJsonAnnotation,
+                hasJsonMethod = option.isFromJsonSelected || option.isToJsonSelected,
+                isFirst = index == 0,
+                isSeparatedFile = isSeparateCheckBoxSelected,
+                className = className
+            ).replace("\n", "<br>")
+        }
 """.trimIndent()
 
+    htmlClass += createAnnotation(
+        isFreezed = option.isFreezedSelected,
+        isFromJsonSelected = option.isFromJsonSelected,
+        isToJsonSelected = option.isToJsonSelected
+    ).replace("\n", "<br>")
     htmlClass +=
         if (option.isFreezedSelected) {
             """
-                
-@freezed
 class $className with _$$className {
   factory $className({
     ${
@@ -64,7 +85,6 @@ class $className with _$$className {
                 .replace(" ", "&nbsp;")
         } else {
             """
-
 class $className {
   ${
                 fields.joinToString("\n  ")

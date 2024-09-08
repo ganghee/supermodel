@@ -1,7 +1,9 @@
 package com.github.ganghee.supermodel.create
 
-import com.github.ganghee.supermodel.extensions.toSnakeCase
 import com.github.ganghee.supermodel.model.ModelInfo
+import createAnnotation
+import createFreezedPart
+import createGeneratorPart
 
 fun createDataClassContent(
     isSeparatedFile: Boolean,
@@ -10,32 +12,46 @@ fun createDataClassContent(
     """
 ${if (isSeparatedFile) it.imports.joinToString("\n") else ""}
 ${
-        if (isCreateFreezedPart(
-                modelItems = modelItems,
-                isFreezed = it.option.isFreezedSelected,
-                isFirst = it == modelItems[0],
-                isSeparatedFile = isSeparatedFile
-            )
-        ) "import 'package:freezed_annotation/freezed_annotation.dart';\n\npart '${it.className.toSnakeCase()}.freezed.dart';" else ""
+        createFreezedPart(
+            hasFreezedAnnotation = modelItems.any { it.option.isFreezedSelected },
+            isFreezed = it.option.isFreezedSelected,
+            isFirst = it == modelItems[0],
+            isSeparatedFile = isSeparatedFile,
+            className = it.className
+        )
     }
-    
-""".trimStart() + if (it.option.isFreezedSelected) {
-        """
-
-@freezed
+${
+        createGeneratorPart(
+            hasJsonAnnotation = modelItems.any { it.option.isFromJsonSelected || it.option.isToJsonSelected },
+            hasJsonMethod = it.option.isFromJsonSelected || it.option.isToJsonSelected,
+            isFirst = it == modelItems[0],
+            isSeparatedFile = isSeparatedFile,
+            className = it.className
+        )
+    }
+""".trimStart() + """
+${
+        createAnnotation(
+            isFreezed = it.option.isFreezedSelected,
+            isFromJsonSelected = it.option.isFromJsonSelected,
+            isToJsonSelected = it.option.isToJsonSelected
+        )
+    }""" +
+            if (it.option.isFreezedSelected) {
+                """
 class ${it.className} with _$${it.className} {
   factory ${it.className}({
     ${
-            it.fields.joinToString("\n    ") { parameter ->
-                val strings = parameter.split(" ")
-                "required " + strings[1] + " " + strings[2].replace(";", ",")
-            }
-        }
+                    it.fields.joinToString("\n    ") { parameter ->
+                        val strings = parameter.split(" ")
+                        "required " + strings[1] + " " + strings[2].replace(";", ",")
+                    }
+                }
   }) = _${it.className};
 }
 """.trimIndent()
-    } else {
-        """
+            } else {
+                """
 
 class ${it.className} {
   ${it.fields.joinToString("\n  ")}
@@ -45,13 +61,5 @@ class ${it.className} {
   });
 }
 """.trimIndent()
-    }
+            }
 }
-
-private fun isCreateFreezedPart(
-    modelItems: List<ModelInfo>,
-    isFreezed: Boolean,
-    isFirst: Boolean,
-    isSeparatedFile: Boolean
-): Boolean = (isFirst && modelItems.any { it.option.isFreezedSelected }) ||
-        !isFirst && isSeparatedFile && isFreezed
