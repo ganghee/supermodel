@@ -34,3 +34,11 @@ fun String.save(srcDir: PsiDirectory, fileName: String) {
     }
 }
 
+fun String.addSuffix(suffix: String, type: String? = null): String {
+    val isPrimitive = this in listOf("int", "double", "String", "bool")
+    val isTypeObject = type !in listOf("int", "double", "String", "bool")
+    if((!isPrimitive && type == null) || (type != null && isTypeObject)) {
+        return this + suffix
+    }
+    return this;
+}

@@ -5,7 +5,7 @@ import createAnnotation
 import createFreezedPart
 import createGeneratorPart
 
-fun createDataClassContent(
+fun createBasicClass(
     isSeparatedFile: Boolean,
     modelItems: List<ModelInfo>
 ) = modelItems.joinToString("\n") {

@@ -5,25 +5,56 @@ import com.github.ganghee.supermodel.dialog.MyCustomDialog
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
+import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
 import com.intellij.psi.PsiDirectory
+import com.intellij.psi.PsiManager
 
 
 class MyDemoAction : AnAction() {
     override fun actionPerformed(e: AnActionEvent) {
-        val dialog = MyCustomDialog()
+        val dialog = MyCustomDialog(project = e.project)
 
         val psiDirectory =
             if (e.getData(CommonDataKeys.PSI_ELEMENT) is PsiDirectory) e.getData(CommonDataKeys.PSI_ELEMENT) as PsiDirectory?
             else null
 
         if (psiDirectory != null) {
-            val virtualFile = psiDirectory.virtualFile
-            val directoryPath = virtualFile.path
-
             if (dialog.showAndGet()) {
+                val responsePath = dialog.selectedResponseDirectory
+                val responsePsiDirectory = getPsiDirectoryFromPath(e.project!!, responsePath)
+                val dtoPath = dialog.selectedDtoDirectory
+                val dtoPsiDirectory = getPsiDirectoryFromPath(e.project!!, dtoPath)
+                val voPath = dialog.selectedVoDirectory
+                val voPsiDirectory = getPsiDirectoryFromPath(e.project!!, voPath)
+
+                if(dialog.isCheckedResponse && responsePsiDirectory == null) {
+                    Messages.showMessageDialog(
+                        "Please select a directory for response", "Information", Messages.getInformationIcon()
+                    )
+                    return
+                }
+                if(dialog.isCheckedDto && dtoPsiDirectory == null) {
+                    Messages.showMessageDialog(
+                        "Please select a directory for dto", "Information", Messages.getInformationIcon()
+                    )
+                    return
+                }
+                if(dialog.isCheckedVo && voPsiDirectory == null) {
+                    Messages.showMessageDialog(
+                        "Please select a directory for vo", "Information", Messages.getInformationIcon()
+                    )
+                    return
+                }
+
                 createModelFile(
-                    directory = psiDirectory,
+                    basicDirectory = psiDirectory,
+                    isCheckedResponse = dialog.isCheckedResponse,
+                    isCheckedDto = dialog.isCheckedDto,
+                    isCheckedVo = dialog.isCheckedVo,
+                    responsePsiDirectory = responsePsiDirectory,
+                    dtoDirectory = dtoPsiDirectory,
+                    voDirectory = voPsiDirectory,
                     rootClassName = dialog.rootClassName,
                     modelItems = dialog.modelItems,
                     isSeparatedFile = dialog.isSeparatedFile
@@ -33,6 +64,13 @@ class MyDemoAction : AnAction() {
             Messages.showMessageDialog(
                 "Please select a directory", "Information", Messages.getInformationIcon()
             )
+        }
+    }
+
+    private fun getPsiDirectoryFromPath(project: Project, path: String): PsiDirectory? {
+        val virtualFile = com.intellij.openapi.vfs.LocalFileSystem.getInstance().findFileByPath(path)
+        return virtualFile?.let { file ->
+            PsiManager.getInstance(project).findDirectory(file)
         }
     }
 }

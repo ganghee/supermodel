@@ -7,7 +7,7 @@ import javax.swing.JPanel
 
 fun createClassOptionsPanel(
     classOptionsPanel: JPanel,
-    rightPanel: JPanel,
+    leftPanel: JPanel,
     models: List<ModelInfo>,
     onCheckBoxClick: (index: Int, isFreezed: Boolean?, isToJson: Boolean?, isFromJson: Boolean?) -> Unit,
 ) {
@@ -32,9 +32,4 @@ fun createClassOptionsPanel(
             }
         }
     )
-    // 아래 로직을 써야 preview가 갱신된다.
-    classOptionsPanel.revalidate()
-    classOptionsPanel.repaint()
-    rightPanel.revalidate()
-    rightPanel.repaint()
 }
