@@ -34,11 +34,22 @@ fun String.save(srcDir: PsiDirectory, fileName: String) {
     }
 }
 
-fun String.addSuffix(suffix: String, type: String? = null): String {
-    val isPrimitive = this in listOf("int", "double", "String", "bool")
-    val isTypeObject = type !in listOf("int", "double", "String", "bool")
-    if((!isPrimitive && type == null) || (type != null && isTypeObject)) {
+fun String.addSuffix(suffix: String, type: String? = null, isNotNull: Boolean = false): String {
+    val isTypeObject = type == null && this !in listOf(
+        "int",
+        "double",
+        "String",
+        "bool"
+    )// 자료형에 접미사 붙이기
+    val isParameterObject = type != null && type !in listOf(
+        "int",
+        "double",
+        "String",
+        "bool"
+    )// 변수명에 접미사 붙이기
+    if ((isTypeObject || isParameterObject) && !this.startsWith("List<")) {
         return this + suffix
+    } else {
+        return this + if(isNotNull) "" else "?"
     }
-    return this;
 }

@@ -21,9 +21,10 @@ class ${it.className}Dto {
   ${
         it.fields.joinToString("\n  ") { field ->
             val strings = field.split(" ")
-            "final " + strings[1].addSuffix("Dto") + " " + strings[2].removeSuffix(";").addSuffix(
+            "final " + strings[1].addSuffix("Dto?") + " " + strings[2].removeSuffix(";").addSuffix(
                 "Dto",
-                type = strings[1]
+                type = strings[1],
+                isNotNull = true
             ) + ';'
         }
     }
@@ -34,7 +35,8 @@ class ${it.className}Dto {
             val strings = parameter.split(" ")
             "required " + strings[1].removeSuffix(",").addSuffix(
                 "Dto",
-                type = it.fields[index].split(" ")[1]
+                type = it.fields[index].split(" ")[1],
+                isNotNull = true
             ) + ','
         }.joinToString("\n    ")
     }
