@@ -3,7 +3,10 @@ package com.github.ganghee.supermodel.dialog
 import com.github.ganghee.supermodel.create.createClassOptionsPanel
 import com.github.ganghee.supermodel.create.createParameter
 import com.github.ganghee.supermodel.model.ModelInfo
+import com.intellij.openapi.editor.event.DocumentEvent
+import com.intellij.openapi.editor.event.DocumentListener
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
+import com.intellij.openapi.fileTypes.PlainTextLanguage
 import com.intellij.openapi.ui.DialogWrapper
 import com.intellij.ui.dsl.builder.AlignX
 import com.intellij.ui.dsl.builder.AlignY
@@ -53,11 +56,12 @@ class MyCustomDialog(
             maximumSize = Dimension(100, 400)
         }
 
-        val jsonTextField = JTextArea(30, 70).apply {
-            lineWrap = false
-            wrapStyleWord = false
-            font = java.awt.Font("Monospaced", java.awt.Font.PLAIN, 12)
-        }
+        val editorTextField = CustomEditorField(PlainTextLanguage.INSTANCE, project, "")
+        editorTextField.setOneLineMode(false)
+        editorTextField.preferredSize = Dimension(800, 600)
+
+        editorTextField.isVisible = true
+
 
         // separate file checkbox panel
         val separateCheckBoxPanel = panel {
@@ -198,23 +202,27 @@ class MyCustomDialog(
         // json 입력 panel, preview panel
         val jsonTextFieldPanel = panel {
             row {
-                scrollCell(jsonTextField).align(AlignX.FILL)
+                scrollCell(editorTextField).align(AlignX.FILL)
             }
             row {
                 scrollCell(previewWidget).align(AlignX.FILL).enabled(true).align(AlignY.TOP)
             }
         }
 
+        editorTextField.document.addDocumentListener(object: DocumentListener {
 
-        jsonTextField.document.addDocumentListener(object : javax.swing.event.DocumentListener {
-            override fun insertUpdate(e: javax.swing.event.DocumentEvent?) = updateText()
-            override fun removeUpdate(e: javax.swing.event.DocumentEvent?) = updateText()
-            override fun changedUpdate(e: javax.swing.event.DocumentEvent?) = updateText()
+            override fun documentChanged(event: DocumentEvent) {
+                updateText()
+            }
+
+            override fun beforeDocumentChange(event: DocumentEvent) {
+                updateText()
+            }
 
             private fun updateText() {
-                val text = jsonTextField.text
+                val text = editorTextField.text
                 models.clear()
-                classOptionsPanel.isVisible = text.isNotEmpty()
+                classOptionsPanel.isVisible = text.isNotEmpty() && !isResponseChecked
                 if (text.isNotEmpty()) {
                     try {
                         createParameter(
@@ -238,7 +246,6 @@ class MyCustomDialog(
                         )
                         createClassOptionsPanel(
                             classOptionsPanel = classOptionsPanel,
-                            leftPanel = leftPanel,
                             models = models,
                             onCheckBoxClick = { index, isFreezed, isToJson, isFromJson ->
                                 models.replaceAll { modelInfo ->
@@ -280,6 +287,8 @@ class MyCustomDialog(
 
         leftPanel.apply {
             layout = BoxLayout(leftPanel, BoxLayout.Y_AXIS)
+            alignmentX = 0.5f
+            alignmentY = 0.5f
             add(separateCheckBoxPanel)
             add(classNameTextFieldPanel)
             add(responseDirectoryPanel)

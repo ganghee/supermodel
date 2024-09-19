@@ -7,7 +7,6 @@ import javax.swing.JPanel
 
 fun createClassOptionsPanel(
     classOptionsPanel: JPanel,
-    leftPanel: JPanel,
     models: List<ModelInfo>,
     onCheckBoxClick: (index: Int, isFreezed: Boolean?, isToJson: Boolean?, isFromJson: Boolean?) -> Unit,
 ) {

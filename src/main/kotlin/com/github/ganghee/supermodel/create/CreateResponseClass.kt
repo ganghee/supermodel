@@ -19,6 +19,7 @@ ${
         if (it == modelItems[0] || isSeparatedFile) {
             "import 'package:data/src/mapper/data_to_domain_mapper.dart';\n" +
                     "import 'package:domain/domain.dart';\n\n" +
+                    "import 'package:json_annotation/json_annotation.dart';\n" +
                     "part '${it.className.toSnakeCase()}_response.g.dart';\n"
         } else {
             ""
