@@ -21,9 +21,9 @@
     <actions>
         <group description="Demo action group" id="MyDemoActionGroup" >
             <action class="com.github.ganghee.supermodel.MyDemoAction"
-                description="Demo action example"
+                description="create model"
                 id="com.example.demoplugin.MyDemoAction"
-                text="Demo Action" />
+                text="create model" />
 
             <add-to-group
                 anchor="first"
