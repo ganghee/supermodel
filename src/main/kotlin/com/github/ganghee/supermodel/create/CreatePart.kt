@@ -1,10 +1,10 @@
 import com.github.ganghee.supermodel.extensions.toSnakeCase
+import com.github.ganghee.supermodel.model.Setting.isSeparatedFile
 
 fun createFreezedPart(
     hasFreezedAnnotation: Boolean,
     isFreezed: Boolean,
     isFirst: Boolean,
-    isSeparatedFile: Boolean,
     className: String
 ): String {
     return if ((isFirst && hasFreezedAnnotation) ||

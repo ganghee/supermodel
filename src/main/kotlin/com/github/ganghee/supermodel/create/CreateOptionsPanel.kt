@@ -1,19 +1,18 @@
 package com.github.ganghee.supermodel.create
 
-import com.github.ganghee.supermodel.model.ModelInfo
+import com.github.ganghee.supermodel.model.Setting.modelItems
 import com.intellij.ui.dsl.builder.panel
 import com.intellij.ui.dsl.builder.whenStateChangedFromUi
 import javax.swing.JPanel
 
 fun createClassOptionsPanel(
     classOptionsPanel: JPanel,
-    models: List<ModelInfo>,
     onCheckBoxClick: (index: Int, isFreezed: Boolean?, isToJson: Boolean?, isFromJson: Boolean?) -> Unit,
 ) {
     classOptionsPanel.removeAll()
     classOptionsPanel.add(
         panel {
-            models.mapIndexed { index, modelInfo ->
+            modelItems.mapIndexed { index, modelInfo ->
                 row {
                     text("Class Name: ${modelInfo.className}")
                 }

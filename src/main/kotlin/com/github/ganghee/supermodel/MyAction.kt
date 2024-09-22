@@ -1,7 +1,10 @@
 package com.github.ganghee.supermodel
 
 import com.github.ganghee.supermodel.create.createModelFile
+import com.github.ganghee.supermodel.ui.DtoDirectory
 import com.github.ganghee.supermodel.ui.MyCustomDialog
+import com.github.ganghee.supermodel.ui.ResponseDirectory
+import com.github.ganghee.supermodel.ui.VoDirectory
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
@@ -21,43 +24,41 @@ class MyDemoAction : AnAction() {
 
         if (psiDirectory != null) {
             if (dialog.showAndGet()) {
-                val responsePath = dialog.responseDirectory
-                val responsePsiDirectory = getPsiDirectoryFromPath(e.project!!, responsePath)
-                val dtoPath = dialog.dtoDirectory
-                val dtoPsiDirectory = getPsiDirectoryFromPath(e.project!!, dtoPath)
-                val voPath = dialog.voDirectory
-                val voPsiDirectory = getPsiDirectoryFromPath(e.project!!, voPath)
+                val responsePsiDirectory =
+                    getPsiDirectoryFromPath(e.project!!, ResponseDirectory.filePath)
+                val dtoPsiDirectory = getPsiDirectoryFromPath(e.project!!, DtoDirectory.filePath)
+                val voPsiDirectory = getPsiDirectoryFromPath(e.project!!, VoDirectory.filePath)
 
-                if(dialog.isCheckedResponse && responsePsiDirectory == null) {
+                if (ResponseDirectory.isCheck && responsePsiDirectory == null) {
                     Messages.showMessageDialog(
-                        "Please select a directory for response", "Information", Messages.getInformationIcon()
+                        "Please select a directory for response",
+                        "Information",
+                        Messages.getInformationIcon()
                     )
                     return
                 }
-                if(dialog.isCheckedDto && dtoPsiDirectory == null) {
+                if (DtoDirectory.isCheck && dtoPsiDirectory == null) {
                     Messages.showMessageDialog(
-                        "Please select a directory for dto", "Information", Messages.getInformationIcon()
+                        "Please select a directory for dto",
+                        "Information",
+                        Messages.getInformationIcon()
                     )
                     return
                 }
-                if(dialog.isCheckedVo && voPsiDirectory == null) {
+                if (VoDirectory.isCheck && voPsiDirectory == null) {
                     Messages.showMessageDialog(
-                        "Please select a directory for vo", "Information", Messages.getInformationIcon()
+                        "Please select a directory for vo",
+                        "Information",
+                        Messages.getInformationIcon()
                     )
                     return
                 }
 
                 createModelFile(
                     basicDirectory = psiDirectory,
-                    isCheckedResponse = dialog.isCheckedResponse,
-                    isCheckedDto = dialog.isCheckedDto,
-                    isCheckedVo = dialog.isCheckedVo,
                     responsePsiDirectory = responsePsiDirectory,
                     dtoDirectory = dtoPsiDirectory,
                     voDirectory = voPsiDirectory,
-                    rootClassName = dialog.rootClassName,
-                    modelItems = dialog.modelItems,
-                    isSeparatedFile = dialog.isSeparatedFile
                 )
             }
         } else {
@@ -68,7 +69,8 @@ class MyDemoAction : AnAction() {
     }
 
     private fun getPsiDirectoryFromPath(project: Project, path: String): PsiDirectory? {
-        val virtualFile = com.intellij.openapi.vfs.LocalFileSystem.getInstance().findFileByPath(path)
+        val virtualFile =
+            com.intellij.openapi.vfs.LocalFileSystem.getInstance().findFileByPath(path)
         return virtualFile?.let { file ->
             PsiManager.getInstance(project).findDirectory(file)
         }

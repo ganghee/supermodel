@@ -3,6 +3,9 @@ package com.github.ganghee.supermodel.ui
 import com.github.ganghee.supermodel.create.createClassOptionsPanel
 import com.github.ganghee.supermodel.create.createParameter
 import com.github.ganghee.supermodel.model.ModelInfo
+import com.github.ganghee.supermodel.model.Setting.modelItems
+import com.github.ganghee.supermodel.model.Setting.rootClassName
+import com.github.ganghee.supermodel.model.Setting.setModelItems
 import com.intellij.openapi.editor.event.DocumentEvent
 import com.intellij.openapi.editor.event.DocumentListener
 import com.intellij.openapi.fileTypes.PlainTextLanguage
@@ -14,13 +17,9 @@ import javax.swing.JPanel
 
 fun jsonTextField(
     project: Project?,
-    modelItems: MutableList<ModelInfo>,
-    isCheckedResponse: Boolean,
-    isSeparatedFile: Boolean,
     classOptionsPanel: JPanel,
     previewWidget: JLabel,
     leftPanel: JPanel,
-    rootClassName: String,
 ): CustomEditorField {
 
     val jsonTextField = CustomEditorField(PlainTextLanguage.INSTANCE, project, "")
@@ -40,15 +39,17 @@ fun jsonTextField(
 
         private fun updateText() {
             val text = jsonTextField.text
-            modelItems.clear()
-            classOptionsPanel.isVisible = text.isNotEmpty() && !isCheckedResponse
+            val models = modelItems.toMutableList()
+
+            models.clear()
+            classOptionsPanel.isVisible = text.isNotEmpty() && !ResponseDirectory.isCheck
             if (text.isNotEmpty()) {
                 try {
                     createParameter(
                         jsonText = text,
-                        modelItems = modelItems,
+                        modelItems = models,
                         onParameter = { fields, parameters, imports ->
-                            modelItems.add(
+                            models.add(
                                 0, ModelInfo(
                                     className = rootClassName,
                                     fields = fields,
@@ -58,16 +59,12 @@ fun jsonTextField(
                             )
                         }
                     )
-                    createHTML(
-                        modelItems = modelItems,
-                        isSeparateCheckBoxSelected = isSeparatedFile,
-                        previewWidget = previewWidget,
-                    )
+                    setModelItems(models)
+                    createHTML(previewWidget = previewWidget)
                     createClassOptionsPanel(
                         classOptionsPanel = classOptionsPanel,
-                        models = modelItems,
                         onCheckBoxClick = { index, isFreezed, isToJson, isFromJson ->
-                            modelItems.replaceAll { modelInfo ->
+                            models.replaceAll { modelInfo ->
                                 val changedOptionModel = modelInfo.option.copy(
                                     isFreezedSelected = isFreezed
                                         ?: modelInfo.option.isFreezedSelected,
@@ -76,17 +73,13 @@ fun jsonTextField(
                                     isFromJsonSelected = isFromJson
                                         ?: modelInfo.option.isFromJsonSelected,
                                 )
-                                if (modelInfo == modelItems[index]) {
+                                if (modelInfo == models[index]) {
                                     modelInfo.copy(option = changedOptionModel)
                                 } else {
                                     modelInfo
                                 }
                             }
-                            createHTML(
-                                modelItems = modelItems,
-                                isSeparateCheckBoxSelected = isSeparatedFile,
-                                previewWidget = previewWidget,
-                            )
+                            createHTML(previewWidget = previewWidget)
 
                         },
                     )

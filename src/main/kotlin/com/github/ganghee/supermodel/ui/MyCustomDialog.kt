@@ -1,12 +1,13 @@
 package com.github.ganghee.supermodel.ui
 
-import com.github.ganghee.supermodel.model.ModelInfo
+import com.github.ganghee.supermodel.model.Setting.isSeparatedFile
+import com.github.ganghee.supermodel.model.Setting.setSeparateFileState
 import com.intellij.openapi.ui.DialogWrapper
 import com.intellij.ui.dsl.builder.AlignX
 import com.intellij.ui.dsl.builder.AlignY
+import com.intellij.ui.dsl.builder.bindSelected
 import com.intellij.ui.dsl.builder.panel
 import com.intellij.ui.dsl.builder.plus
-import com.intellij.ui.dsl.builder.whenStateChangedFromUi
 import createHTML
 import java.awt.Dimension
 import javax.swing.BoxLayout
@@ -19,42 +20,6 @@ import javax.swing.JPanel
 class MyCustomDialog(
     val project: com.intellij.openapi.project.Project?
 ) : DialogWrapper(true) {
-
-    private var _isCheckedResponse = false
-    val isCheckedResponse: Boolean
-        get() = this._isCheckedResponse
-
-    private var _isCheckedDto = false
-    val isCheckedDto: Boolean
-        get() = this._isCheckedDto
-
-    private var _isCheckedVo = false
-    val isCheckedVo: Boolean
-        get() = this._isCheckedVo
-
-    private var _responseDirectory: String = ""
-    val responseDirectory: String
-        get() = this._responseDirectory
-
-    private var _dtoDirectory: String = ""
-    val dtoDirectory: String
-        get() = this._dtoDirectory
-
-    private var _voDirectory: String = ""
-    val voDirectory: String
-        get() = this._voDirectory
-
-    private var _rootClassName: String = ""
-    val rootClassName: String
-        get() = this._rootClassName
-
-    private val _modelItems = mutableListOf<ModelInfo>()
-    val modelItems: List<ModelInfo>
-        get() = this._modelItems
-
-    private var _isSeparatedFile = false
-    val isSeparatedFile: Boolean
-        get() = this._isSeparatedFile
 
     init {
         title = "Json to Dart"
@@ -82,56 +47,42 @@ class MyCustomDialog(
             add(
                 panel {
                     row {
-                        checkBox("Separate file").whenStateChangedFromUi { selected ->
-                            _isSeparatedFile = selected
-                            createHTML(
-                                modelItems = _modelItems,
-                                isSeparateCheckBoxSelected = _isSeparatedFile,
-                                previewWidget = previewWidget,
-                            )
+                        checkBox("Separate file").bindSelected(
+                            { isSeparatedFile },
+                            {}
+                        ).onChanged {
+                            setSeparateFileState(!isSeparatedFile)
+                            createHTML(previewWidget = previewWidget)
                         }.align(AlignY.FILL + AlignX.LEFT)
                     }
                 }
             )
             // 클래스 이름 입력 panel
             add(
-                rootClassNameTextFieldPanel(
-                    models = _modelItems,
-                    isSeparateCheckBoxSelected = _isSeparatedFile,
-                    previewWidget = previewWidget,
-                    onChangedRootClassName = { changedClassName ->
-                        _rootClassName = changedClassName
-                    },
-                )
+                rootClassNameTextFieldPanel(previewWidget = previewWidget)
             )
             // response 파일 이름 입력 panel
             add(
                 directoryPanel(
                     project = project,
-                    directoryType = DirectoryType.RESPONSE,
-                    onChangedCheckBox = { selected ->
-                        _isCheckedResponse = selected
-                        classOptionsPanel.isVisible = !selected
-                    },
-                    onChangedFilePath = { path -> _responseDirectory = path },
+                    directoryType = ResponseDirectory,
+                    onVisibleClassOptionsPanel = { isResponseCheck ->
+                        classOptionsPanel.isVisible = !isResponseCheck
+                    }
                 )
             )
             // dto 파일 이름 입력 panel
             add(
                 directoryPanel(
                     project = project,
-                    directoryType = DirectoryType.DTO,
-                    onChangedCheckBox = { selected -> _isCheckedDto = selected },
-                    onChangedFilePath = { path -> _dtoDirectory = path },
+                    directoryType = DtoDirectory,
                 )
             )
             // vo 파일 이름 입력 panel
             add(
                 directoryPanel(
                     project = project,
-                    directoryType = DirectoryType.VO,
-                    onChangedCheckBox = { selected -> _isCheckedVo = selected },
-                    onChangedFilePath = { path -> _voDirectory = path },
+                    directoryType = VoDirectory,
                 )
             )
             add(classOptionsPanel)
@@ -145,13 +96,9 @@ class MyCustomDialog(
                         scrollCell(
                             jsonTextField(
                                 project = project,
-                                modelItems = _modelItems,
-                                isCheckedResponse = _isCheckedResponse,
-                                isSeparatedFile = _isSeparatedFile,
                                 classOptionsPanel = classOptionsPanel,
                                 previewWidget = previewWidget,
                                 leftPanel = leftPanel,
-                                rootClassName = _rootClassName,
                             )
                         ).align(AlignX.FILL)
                     }

@@ -16,7 +16,6 @@ ${
             hasFreezedAnnotation = modelItems.any { it.option.isFreezedSelected },
             isFreezed = it.option.isFreezedSelected,
             isFirst = it == modelItems[0],
-            isSeparatedFile = isSeparatedFile,
             className = it.className
         )
     }
