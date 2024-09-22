@@ -1,7 +1,7 @@
 package com.github.ganghee.supermodel
 
 import com.github.ganghee.supermodel.create.createModelFile
-import com.github.ganghee.supermodel.dialog.MyCustomDialog
+import com.github.ganghee.supermodel.ui.MyCustomDialog
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
@@ -21,11 +21,11 @@ class MyDemoAction : AnAction() {
 
         if (psiDirectory != null) {
             if (dialog.showAndGet()) {
-                val responsePath = dialog.selectedResponseDirectory
+                val responsePath = dialog.responseDirectory
                 val responsePsiDirectory = getPsiDirectoryFromPath(e.project!!, responsePath)
-                val dtoPath = dialog.selectedDtoDirectory
+                val dtoPath = dialog.dtoDirectory
                 val dtoPsiDirectory = getPsiDirectoryFromPath(e.project!!, dtoPath)
-                val voPath = dialog.selectedVoDirectory
+                val voPath = dialog.voDirectory
                 val voPsiDirectory = getPsiDirectoryFromPath(e.project!!, voPath)
 
                 if(dialog.isCheckedResponse && responsePsiDirectory == null) {
