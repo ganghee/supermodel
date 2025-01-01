@@ -1,12 +1,11 @@
-package com.github.ganghee.supermodel.ui
+import com.github.ganghee.supermodel.ui.DirectoryState
+import com.intellij.ui.dsl.builder.panel
 
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.DialogPanel
 import com.intellij.ui.dsl.builder.AlignY
-import com.intellij.ui.dsl.builder.Panel
 import com.intellij.ui.dsl.builder.bindSelected
-import com.intellij.ui.dsl.builder.panel
 import com.intellij.ui.dsl.builder.text
 import java.awt.Dimension
 
@@ -16,7 +15,7 @@ fun directoryPanel(
     directoryType: DirectoryState,
     onVisibleClassOptionsPanel: ((isResponseCheck: Boolean) -> Unit)? = null
 ): DialogPanel {
-    var fileButton: Panel? = null
+    var fileButton: com.intellij.ui.dsl.builder.Panel? = null
     return panel {
         row {
             label("${directoryType.className} Directory:").align(AlignY.TOP)
