@@ -1,4 +1,4 @@
-package com.github.ganghee.supermodel.dialog
+package com.github.ganghee.supermodel.ui
 
 import com.intellij.lang.Language
 import com.intellij.openapi.editor.ex.EditorEx

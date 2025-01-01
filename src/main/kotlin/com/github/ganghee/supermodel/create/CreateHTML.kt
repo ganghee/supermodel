@@ -1,12 +1,9 @@
-import com.github.ganghee.supermodel.model.ModelInfo
 import com.github.ganghee.supermodel.model.Option
+import com.github.ganghee.supermodel.model.Setting.isSeparatedFile
+import com.github.ganghee.supermodel.model.Setting.modelItems
 import javax.swing.JLabel
 
-fun createHTML(
-    modelItems: List<ModelInfo>,
-    isSeparateCheckBoxSelected: Boolean,
-    previewWidget: JLabel,
-) {
+fun createHTML(previewWidget: JLabel) {
     val htmlJsons = mutableListOf<String>()
     modelItems.forEachIndexed { index, it ->
         val htmlJsonText = createHTMLClass(
@@ -15,7 +12,7 @@ fun createHTML(
             fields = it.fields.distinct(),
             parameters = it.parameters.distinct(),
             imports = it.imports.distinct(),
-            isSeparateCheckBoxSelected = isSeparateCheckBoxSelected,
+            isSeparateCheckBoxSelected = isSeparatedFile,
             option = it.option,
             hasFreezedAnnotation = modelItems.any { it.option.isFreezedSelected },
             hasJsonAnnotation = modelItems.any { it.option.isFromJsonSelected || it.option.isToJsonSelected }
@@ -45,7 +42,6 @@ ${
                 hasFreezedAnnotation = hasFreezedAnnotation,
                 isFreezed = option.isFreezedSelected,
                 isFirst = index == 0,
-                isSeparatedFile = isSeparateCheckBoxSelected,
                 className = className
             )
         }

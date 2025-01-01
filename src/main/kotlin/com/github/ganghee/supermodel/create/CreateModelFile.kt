@@ -2,40 +2,33 @@ package com.github.ganghee.supermodel.create
 
 import com.github.ganghee.supermodel.extensions.save
 import com.github.ganghee.supermodel.extensions.toSnakeCase
-import com.github.ganghee.supermodel.model.ModelInfo
+import com.github.ganghee.supermodel.model.Setting.isSeparatedFile
+import com.github.ganghee.supermodel.model.Setting.modelItems
+import com.github.ganghee.supermodel.model.Setting.rootClassName
+import com.github.ganghee.supermodel.ui.DtoDirectory
+import com.github.ganghee.supermodel.ui.ResponseDirectory
+import com.github.ganghee.supermodel.ui.VoDirectory
 import com.intellij.openapi.ui.Messages
 import com.intellij.psi.PsiDirectory
 
 fun createModelFile(
     basicDirectory: PsiDirectory,
-    isCheckedResponse: Boolean,
-    isCheckedDto: Boolean,
-    isCheckedVo: Boolean,
     responsePsiDirectory: PsiDirectory?,
     dtoDirectory: PsiDirectory?,
     voDirectory: PsiDirectory?,
-    rootClassName: String,
-    modelItems: List<ModelInfo>,
-    isSeparatedFile: Boolean
 ) {
-
-
-    if(isCheckedResponse && responsePsiDirectory != null) {
+    if (ResponseDirectory.isCheck && responsePsiDirectory != null) {
         if (isSeparatedFile) {
             modelItems.forEach {
-                createResponseClass(
-                    isSeparatedFile = true,
-                    modelItems = listOf(it)
-                ).save(
-                    srcDir = responsePsiDirectory, fileName = "${it.className.toSnakeCase()}_response.dart"
+                createResponseClass(listOf(it)).save(
+                    srcDir = responsePsiDirectory,
+                    fileName = "${it.className.toSnakeCase()}_response.dart"
                 )
             }
         } else {
-            createResponseClass(
-                isSeparatedFile = false,
-                modelItems = modelItems
-            ).save(
-                srcDir = responsePsiDirectory, fileName = "${rootClassName.toSnakeCase()}_response.dart"
+            createResponseClass(modelItems).save(
+                srcDir = responsePsiDirectory,
+                fileName = "${rootClassName.toSnakeCase()}_response.dart"
             )
         }
     } else {
@@ -58,41 +51,29 @@ fun createModelFile(
         }
     }
 
-    if(isCheckedDto && dtoDirectory != null) {
+    if (DtoDirectory.isCheck && dtoDirectory != null) {
         if (isSeparatedFile) {
             modelItems.forEach {
-                createDtoClass(
-                    isSeparatedFile = true,
-                    modelItems = listOf(it)
-                ).save(
+                createDtoClass(listOf(it)).save(
                     srcDir = dtoDirectory, fileName = "${it.className.toSnakeCase()}_dto.dart"
                 )
             }
         } else {
-            createDtoClass(
-                isSeparatedFile = false,
-                modelItems = modelItems
-            ).save(
+            createDtoClass(modelItems).save(
                 srcDir = dtoDirectory, fileName = "${rootClassName.toSnakeCase()}_dto.dart"
             )
         }
     }
 
-    if(isCheckedVo && voDirectory != null) {
+    if (VoDirectory.isCheck && voDirectory != null) {
         if (isSeparatedFile) {
             modelItems.forEach {
-                createVoClass(
-                    isSeparatedFile = true,
-                    modelItems = listOf(it)
-                ).save(
+                createVoClass(listOf(it)).save(
                     srcDir = voDirectory, fileName = "${it.className.toSnakeCase()}_vo.dart"
                 )
             }
         } else {
-            createVoClass(
-                isSeparatedFile = false,
-                modelItems = modelItems
-            ).save(
+            createVoClass(modelItems).save(
                 srcDir = voDirectory, fileName = "${rootClassName.toSnakeCase()}_vo.dart"
             )
         }

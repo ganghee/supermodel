@@ -2,9 +2,9 @@ package com.github.ganghee.supermodel.create
 
 import com.github.ganghee.supermodel.extensions.addSuffix
 import com.github.ganghee.supermodel.model.ModelInfo
+import com.github.ganghee.supermodel.model.Setting.isSeparatedFile
 
 fun createDtoClass(
-    isSeparatedFile: Boolean,
     modelItems: List<ModelInfo>
 ) = modelItems.joinToString("\n") {
     """
