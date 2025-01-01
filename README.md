@@ -17,11 +17,11 @@
 - [ ] Click the <kbd>Watch</kbd> button on the top of the [IntelliJ Platform Plugin Template][template] to be notified about releases containing new features and fixes.
 
 <!-- Plugin description -->
-This Fancy IntelliJ Platform Plugin is going to be your implementation of the brilliant ideas that you have.
+클린 아키텍처에서 dart model을 만드는 플러그인 입니다.
 
-This specific section is a source for the [plugin.xml](/src/main/resources/META-INF/plugin.xml) file which will be extracted by the [Gradle](/build.gradle.kts) during the build process.
+Entity의 Response모델 UseCase의 Dto모델 Presenter의 Vo 모델을 한 번에 생성합니다.
 
-To keep everything working, do not remove `<!-- ... -->` sections. 
+파일하나에 객체 모델 하나씩 분리 여부를 설정할 수 있으며 3개의 모델을 원하는 위치의 폴더에 생성할 수 있습니다.
 <!-- Plugin description end -->
 
 ## Installation
