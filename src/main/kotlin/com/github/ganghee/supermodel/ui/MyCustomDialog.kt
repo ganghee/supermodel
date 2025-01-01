@@ -9,6 +9,7 @@ import com.intellij.ui.dsl.builder.bindSelected
 import com.intellij.ui.dsl.builder.panel
 import com.intellij.ui.dsl.builder.plus
 import createHTML
+import directoryPanel
 import java.awt.Dimension
 import javax.swing.BoxLayout
 import javax.swing.JComponent
@@ -29,7 +30,7 @@ class MyCustomDialog(
     override fun createCenterPanel(): JComponent {
         val mainPanel = JPanel()
         val leftPanel = JPanel().apply {
-            minimumSize = Dimension(1000, 500)
+            minimumSize = Dimension(600, 500)
         }
         val previewWidget = JLabel("Type something...").apply {
             font = java.awt.Font("Monospaced", java.awt.Font.PLAIN, 12)

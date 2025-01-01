@@ -24,7 +24,8 @@ fun jsonTextField(
 
     val jsonTextField = CustomEditorField(PlainTextLanguage.INSTANCE, project, "")
     jsonTextField.setOneLineMode(false)
-    jsonTextField.preferredSize = Dimension(800, 600)
+    jsonTextField.minimumSize = Dimension(300, 300)
+    jsonTextField.preferredSize = Dimension(500, 300)
     jsonTextField.isVisible = true
 
     jsonTextField.document.addDocumentListener(object : DocumentListener {
